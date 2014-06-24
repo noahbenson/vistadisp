@@ -13,6 +13,8 @@ function doRetinotopyScan(params)
 
 % defaults
 if ~exist('params', 'var'), error('No parameters specified!'); end
+if ~isfield(params, 'skipSyncTests'), skipSyncTests = true;
+else                                  skipSyncTests = params.skipSyncTests; end
 
 % make/load stimulus
 stimulus = retLoadStimulus(params);
@@ -26,8 +28,10 @@ try
     % check for OpenGL
     AssertOpenGL;
     
-    % to skip annoying warning message on display (but not terminal)
-    Screen('Preference','SkipSyncTests', 1);
+    % added a checkbox to ret gui allowing user to specify whether PTB
+    % should skip sync tests or not:
+    % Applications2/Retinotopy/standard/doRetinotopyScan.m
+    Screen('Preference','SkipSyncTests', skipSyncTests);
     
     % Open the screen
     xy = params.display.numPixels; % store screen dimensions in case they change
@@ -112,7 +116,13 @@ try
 
 catch ME
     % clean up if error occurred
+<<<<<<< HEAD:Retinotopy/standard/doRetinotopyScan.m
     Screen('CloseAll'); setGamma(0); Priority(0); ShowCursor;
+=======
+    %Screen('CloseAll'); 
+    Screen('Close'); 
+    setGamma(0); Priority(0); ShowCursor;
+>>>>>>> bdef9ec... added a checkbox to ret gui allowing user to specify whether PTB should skip sync tests or not:Applications2/Retinotopy/standard/doRetinotopyScan.m
     warning(ME.identifier, ME.message);
 end;
 
