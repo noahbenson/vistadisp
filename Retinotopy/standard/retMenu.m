@@ -74,10 +74,10 @@ set(handles.fixation(1),    'String',retSetFixationParams);
 tmpdir = which(mfilename);
 tmpdir = fileparts(tmpdir);
 tmp    = dir([tmpdir filesep 'storedImagesMatrices' filesep '*.mat']);
-if ~isempty(tmp),
+if ~isempty(tmp)
     tmp2 = cell(1, length(tmp)+1); % stored image matrices + 'none'
     tmp2{1}   = 'None'; 
-    for n=1:length(tmp),
+    for n=1:length(tmp)
         tmp2{n+1} = tmp(n).name;
     end;
     set(handles.loadMatrix,     'String',tmp2);  
@@ -92,7 +92,7 @@ set(handles.calibration,'String',mydir);
 
 % Set default params for retMenu
 if notDefined('varargin'), data = [];
-else data = varargin{1}; end
+else, data = varargin{1}; end
 data = retCreateDefaultGUIParams(data);
 
 % Add default values to handles
@@ -167,12 +167,12 @@ set(handles.contrast,           'String',   num2str(data.contrast));
 
 % set the string parameters
 if isfinite(data.interleaves ), set(handles.interleaves,'String', num2str(data.interleaves));
-else set(handles.interleaves,'String', 'N/A'); end
+else, set(handles.interleaves,'String', 'N/A'); end
 set(handles.tr,'String', num2str(data.tr, 10));
-if ~isfield(data, 'saveMatrix') || isempty(data.saveMatrix), 
+if ~isfield(data, 'saveMatrix') || isempty(data.saveMatrix) 
     set(handles.saveMatrix, 'String','None');
 else
-    [pth fname ext] = fileparts(data.saveMatrix);
+    [pth, fname, ext] = fileparts(data.saveMatrix);
     if isempty(fname), fname = pth; end
     if isempty(ext) && ~strcmpi(fname, 'None'), ext = '.mat'; end
     set(handles.saveMatrix, 'String',[fname ext]);
@@ -185,7 +185,7 @@ set(handles.triggerKey, 'String', data.triggerKey);
 
      
 % data.stimSize        = str2double(get(handles.stimSize,'String'));
- if isnan(data.stimSize),
+ if isnan(data.stimSize)
      set(handles.stimSize, 'String', 'max');
  else
     set(handles.stimSize, 'String', num2str(data.stimSize, 10));
@@ -292,7 +292,7 @@ else
     handles.data.loadMatrix = [tmpdir handles.data.loadMatrix];
 end;
 
-if strcmpi(handles.data.calibration,'none'),
+if strcmpi(handles.data.calibration,'none')
     handles.data.calibration = [];
 end;
 
@@ -334,8 +334,8 @@ handles.data.experiment = contents{get(hObject,'Value')};
 % Set default options for some experiments
 % This is convenient (for me) but may be tricky if you are not aware other
 % settings are changing as well! So print a warning message at least.
-switch handles.data.experiment,
-    case {'8 bars','8 bars with blanks','8 bars (sinewave-soft)','8 bars (sinewave-soft) with blanks', '8 bars with blanks, fixed check size', '8 bars with blanks thin', '8 bars with blanks thick'},
+switch handles.data.experiment
+    case {'8 bars','8 bars with blanks','8 bars (sinewave-soft)','8 bars (sinewave-soft) with blanks', '8 bars with blanks, fixed check size', '8 bars with blanks thin', '8 bars with blanks thick'}
         handles.data.numCycles = 1; 
         set(handles.numCycles,      'String','1');    %#
         handles.data.period    = 192;
@@ -343,14 +343,14 @@ switch handles.data.experiment,
 
         fprintf('[%s]:WARNING: when setting experiment to %s, num Cycles (%d) and period (%d) have been changed as well!\n',...
             mfilename,handles.data.experiment,handles.data.numCycles,handles.data.period);
-    case {'8 bars (sinewave)','8 bars (LMS)'},
+    case {'8 bars (sinewave)','8 bars (LMS)'}
         handles.data.numCycles = 1;
         set(handles.numCycles,      'String','1');    %#
         handles.data.period    = 288;
         set(handles.period,         'String','1');   %seconds
         fprintf('[%s]:WARNING: when setting experiment to %s, num Cycles (%d) and period (%d) have been changed as well!\n',...
             mfilename,handles.data.experiment,handles.data.numCycles,handles.data.period);
-    case {'8 bars (LMS) with blanks'},
+    case {'8 bars (LMS) with blanks'}
         handles.data.fixation       = 'double disk';
         set(handles.fixation(1),'Value',2);      
         handles.data.savestimparams = 1;
@@ -364,7 +364,7 @@ switch handles.data.experiment,
         set(handles.period,    'String','288');   %seconds
         fprintf('[%s]:WARNING: when setting experiment to %s, num Cycles (%d) and period (%d) and others have been changed as well!\n',...
             mfilename,handles.data.experiment,handles.data.numCycles,handles.data.period);
-    otherwise,
+    otherwise
         % do nothing
 end;
     
@@ -515,7 +515,7 @@ return;
 %----------------------------------------------------------
 function loadMatrix_Callback(hObject, eventdata, handles)
 contents = get(hObject,'String');
-if iscell(contents),
+if iscell(contents)
     handles.data.loadMatrix=contents{get(hObject,'Value')};
 else
     handles.data.loadMatrix=contents;
@@ -533,7 +533,7 @@ return;
 %----------------------------------------------------------
 function calibration_Callback(hObject, eventdata, handles)
 contents = get(hObject,'String');
-if iscell(contents),
+if iscell(contents)
     handles.data.calibration=contents{get(hObject,'Value')};
 else
     handles.data.calibration=contents;
@@ -551,7 +551,7 @@ return;
 %----------------------------------------------------------
 function stimSize_Callback(hObject, eventdata, handles)
 handles.data.stimSize=str2num(get(hObject,'String'));
-if isempty(handles.data.stimSize),
+if isempty(handles.data.stimSize)
     handles.data.stimSize = 'max';
 end;
 guidata(hObject,handles);

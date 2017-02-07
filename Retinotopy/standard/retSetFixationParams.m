@@ -174,7 +174,7 @@ switch(lower(params.display.fixType))
         params.display.fixSizePixels = 120;
        
         
-    otherwise,
+    otherwise
         error('Unknown fixationType!');
 end
 
