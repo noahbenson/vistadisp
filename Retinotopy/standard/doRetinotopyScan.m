@@ -30,8 +30,18 @@ try
     Screen('Preference','SkipSyncTests', 1);
     
     % Open the screen
+    xy = params.display.numPixels; % store screen dimensions in case they change
     params.display                = openScreen(params.display);
     params.display.devices        = params.devices;
+  
+    % Reset Fixation parameters if needed (ie if the dimensions of the
+    % screen after opening do not match the dimensions specified in the
+    % calibration file) 
+    if isequal(xy, params.display.numPixels)
+        % OK, nothing changed
+    else
+        params = retSetFixationParams(params, params.experiment);
+    end
     
     % to allow blending
     Screen('BlendFunction', params.display.windowPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
