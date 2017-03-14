@@ -116,13 +116,8 @@ try
 
 catch ME
     % clean up if error occurred
-<<<<<<< HEAD:Retinotopy/standard/doRetinotopyScan.m
-    Screen('CloseAll'); setGamma(0); Priority(0); ShowCursor;
-=======
-    %Screen('CloseAll'); 
-    Screen('Close'); 
+    Screen('CloseAll'); 
     setGamma(0); Priority(0); ShowCursor;
->>>>>>> bdef9ec... added a checkbox to ret gui allowing user to specify whether PTB should skip sync tests or not:Applications2/Retinotopy/standard/doRetinotopyScan.m
     warning(ME.identifier, ME.message);
 end;
 
