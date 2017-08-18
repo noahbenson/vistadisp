@@ -30,7 +30,7 @@ duration.prescan.stimframes = params.prescanDuration./duration.stimframe;
 
 
 %% load matrix or make it
-if ~isempty(params.loadMatrix),
+if ~isempty(params.loadMatrix)
     % we should really put some checks that the matrix loaded is
     % appropriate etc.
     load(params.loadMatrix);
@@ -69,20 +69,20 @@ else
     
     % should really do something more intelligent, like outerRad-fix
     switch(lower(params.display.fixType))
-        case 'left disk',
+        case 'left disk'
             [x,y]=meshgrid(linspace( 0,outerRad*2,n),linspace(outerRad,-outerRad,m));
             outerRad = outerRad.*2;
-        case 'right disk',
+        case 'right disk'
             [x,y]=meshgrid(linspace(-outerRad*2,0,n),linspace(outerRad,-outerRad,m));
             outerRad = outerRad.*2;
-        otherwise,
+        otherwise
             [x,y]=meshgrid(linspace(-outerRad,outerRad,n),linspace(outerRad,-outerRad,m));
     end;
     
     % here we crop the image if it is larger than the screen
     % seems that you have to have a square matrix, bug either in my or
     % psychtoolbox' code - so we make it square
-    if m>params.display.numPixels(2),
+    if m>params.display.numPixels(2)
         start  = round((m-params.display.numPixels(2))/2);
         len    = params.display.numPixels(2);
         y = y(start+1:start+len, start+1:start+len);
@@ -111,7 +111,7 @@ else
     fprintf('[%s]:stepsize: %f degrees.\n',mfilename,step_x);
     
     % if we create colored bars we want to make the edges soft.
-    switch params.experiment,
+    switch params.experiment
         case {'8 bars (LMS) with blanks'}
             edgewidth = 25; % .25cpd on a 600 pixel(3deg screen)
             softmask  = makecircle(m-2*edgewidth,m,edgewidth);
@@ -142,7 +142,7 @@ else
             anisotropy=(m/2./sqrt((m/2-abs(Ap_pl_y)).^2*2)).^2;
             %Max_anisotropy=max(anisotropy);
             Max_anisotropy=bandWhit/gap;
-        otherwise,
+        otherwise
             softmask = ones(m);
     end;
     
@@ -152,7 +152,7 @@ else
     
     for imgNum=1:halfNumImages
         
-        if remake_xy(imgNum) >=0,
+        if remake_xy(imgNum) >=0
             x = original_x .* cos(remake_xy(imgNum)) - original_y .* sin(remake_xy(imgNum));
             y = original_x .* sin(remake_xy(imgNum)) + original_y .* cos(remake_xy(imgNum));
             % Calculate checkerboard.
@@ -166,7 +166,7 @@ else
                     rings     = zeros(size(wedges));
                     
                     checks    = zeros(size(rings,1),size(rings,2),params.temporal.motionSteps);
-                    for ii=1:numMotSteps,
+                    for ii=1:numMotSteps
                         tmprings1 = sign(2*round((cos(y*numSubRings*(2*pi/ringWidth)+(ii-1)/numMotSteps*2*pi)+1)/2)-1);
                         tmprings2 = sign(2*round((cos(y*numSubRings*(2*pi/ringWidth)-(ii-1)/numMotSteps*2*pi)+1)/2)-1);
                         rings(posWedges) = tmprings1(posWedges);
@@ -178,7 +178,7 @@ else
                     
                     
                     
-                otherwise,
+                otherwise
                     fprintf('[%s]:unknown experiment: %s.\n',mfilename,params.experiment);
                     return;
             end;
@@ -188,11 +188,11 @@ else
         end;
         
         
-        switch params.type;
+        switch params.type
             case 'bar'
                 loX   = loX + step_x;
                 hiX   = loX + ringWidth;
-            otherwise,
+            otherwise
                 error('Unknown stimulus type!');
                 
         end
@@ -202,6 +202,7 @@ else
         
         % Can we do this just be removing the second | from the window
         % expression? so...        
+        %window = ( (x>=loX & x<=hiX));
         window = ( (x>=loX & x<=hiX) & r<outerRad);
 
         % yet another loop to be able to move the checks...
@@ -227,7 +228,7 @@ else
                 %                images(:,:,[half+1:numMotSteps]+start) = repmat(uint8(img2),[1 1 numMotSteps-half]);
                 
                 c = sin(linspace(0,2*pi,numMotSteps+1));
-                for iii = 1:numMotSteps,
+                for iii = 1:numMotSteps
                     images(:,:,iii+start) = uint8((img2-bk).*c(iii).*softmask+bk);
                 end
                 
@@ -241,7 +242,7 @@ else
                 anisotropy_2=Max_anisotropy;
                 
                 
-                if (mv_y(or)~=0 && mv_x(or)~=0),
+                if (mv_y(or)~=0 && mv_x(or)~=0)
                     anisotropy_1= anisotropy(wind);
                 end;
                 phi = gaborWavelet(xi,yi, pi/2+orientations(or), pi, bandWhit, [anisotropy_1 anisotropy_2]);%imagesc(abs(phi))
@@ -255,7 +256,7 @@ else
                 
                 Am = cos(linspace(0,2*pi,numMotSteps+1)); %for change in amplitude in time
                 
-                for iii = 1:numMotSteps,
+                for iii = 1:numMotSteps
                     %%%%%%%for movment in time
                     %                      tmpvar1      = sin((original_x - loX)*numSubRings*(2*pi/ringWidth)+c(iii));
                     %                       img1=255*tmpvar1.*abs(phi)+128;
@@ -397,7 +398,7 @@ fixSeq   = [fixSeq(length(fixSeq)+1-duration.prescan.stimframes:end); fixSeq];
 stimulus = createStimulusStruct(images,cmap,sequence,[],timing,fixSeq);
 
 %% save matrix if requested
-if ~isempty(params.saveMatrix),
+if ~isempty(params.saveMatrix)
     save(params.saveMatrix,'images');
 end;
 
