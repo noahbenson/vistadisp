@@ -60,7 +60,6 @@ if ~exist('params', 'var'), params = fixString; return; end
 dim.x = params.display.numPixels(1);
 dim.y = params.display.numPixels(2);
 sz    = params.display.fixSizePixels;
-destRec = [(1920-1080)/2   (1080-900)/2  (1920-1080)/2+1080   (1080-900)/2 + 900];
 params.display.fixColorRgb  = [255 0 0 255; 0 255 0 255]; %R/G by default
 params.display.fixDuration  = 2; % maximum duration between fixation change
 switch(lower(params.display.fixType))
@@ -138,29 +137,20 @@ switch(lower(params.display.fixType))
         params.display.fixY = round(dim.y./2);
 
     case 'upper left'
-        params.display.fixX =destRec(1) + 1;
-        params.display.fixY = destRec(2) + 1;
-        
-%         params.display.fixX = 1 + round(max(.5*(dim.x - dim.y),sz));
-%         params.display.fixY = 1 + round(max(.5*(dim.y - dim.x),sz));
+        params.display.fixX = 1 + round(max(.5*(dim.x - dim.y),sz));
+        params.display.fixY = 1 + round(max(.5*(dim.y - dim.x),sz));
 
     case 'lower left'
-        params.display.fixX =destRec(1) + 1;
-        params.display.fixY = destRec(4) - 1;
-%         params.display.fixX = 1 + round(max(.5*(dim.x - dim.y),sz));
-%         params.display.fixY = dim.y - round(max(.5*(dim.y - dim.x),sz));
+        params.display.fixX = 1 + round(max(.5*(dim.x - dim.y),sz));
+        params.display.fixY = dim.y - round(max(.5*(dim.y - dim.x),sz));
 
     case 'upper right'
-        params.display.fixX =destRec(3) - 1;
-        params.display.fixY = destRec(2) + 1;
-%         params.display.fixX = dim.x - round(max(.5*(dim.x - dim.y),sz));
-%         params.display.fixY = 1 + round(max(.5*(dim.y - dim.x),sz));
+        params.display.fixX = dim.x - round(max(.5*(dim.x - dim.y),sz));
+        params.display.fixY = 1 + round(max(.5*(dim.y - dim.x),sz));
 
     case 'lower right'
-        params.display.fixX =destRec(3) - 1;
-        params.display.fixY = destRec(4) - 1;
-%         params.display.fixX = dim.x - round(max(.5*(dim.x - dim.y),sz));
-%         params.display.fixY = dim.y - round(max(.5*(dim.y - dim.x),sz));
+        params.display.fixX = dim.x - round(max(.5*(dim.x - dim.y),sz));
+        params.display.fixY = dim.y - round(max(.5*(dim.y - dim.x),sz));
 
     case 'left'
         params.display.fixX = 1 + round(max(.5*(dim.x - dim.y),sz));
