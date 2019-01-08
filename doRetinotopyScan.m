@@ -77,7 +77,7 @@ try
    
         el = prepEyelink(params.display.windowPtr);
         
-        ELfileName = sprint('%s.edf', sesFileName);
+        ELfileName = sprintf('%s.edf', sesFileName);
         
         edfFileStatus = Eyelink('OpenFile', ELfileName);
         
