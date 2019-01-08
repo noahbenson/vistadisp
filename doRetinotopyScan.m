@@ -27,15 +27,15 @@ initials = input('Please enter subjct initials: ', 's');
 sesNum = input('Please enter session number: ', 's');
 sesNum = str2double(sesNum);
 
-ELfileName = sprintf('%s%d.edf', initials, sesNum);
+sesFileName = sprintf('%s%d', initials, sesNum);
 
-while exist(sprintf('%s.edf',ELfileName), 'file')
+while exist(sprintf('%s.edf',sesFileName), 'file')
     
-    fprintf('\nFilename %s exists. Please re-enter subj ID and session number.\n', ELfileName)
+    fprintf('\nFilename %s exists. Please re-enter subj ID and session number.\n', sesFileName)
     initials = input('Please enter subjct initials: ', 's');
     sesNum = input('Please enter session number: ', 's');
     sesNum = str2double(sesNum);
-    ELfileName = sprintf('%s%d%s', initials, sesNum);
+    sesFileName = sprintf('%s%d%s', initials, sesNum);
     
 end
    
@@ -54,8 +54,10 @@ try
     % to allow blending
     Screen('BlendFunction', params.display.windowPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    %% EyeLink
-    if 0
+    %% Initialize EyeLink if requested
+    if params.doEyelink
+        fprintf('\n[%s]: Setting up Eyelink..\n',mfilename)
+        
         Eyelink('SetAddress','192.168.1.5');
         el = EyelinkInitDefaults(params.display.windowPtr);
         EyelinkUpdateDefaults(el);
@@ -75,15 +77,26 @@ try
    
         el = prepEyelink(params.display.windowPtr);
         
+        ELfileName = sprint('%s.edf', sesFileName);
+        
         edfFileStatus = Eyelink('OpenFile', ELfileName);
         
-        if edfFileStatus ~= 0, fprintf('Cannot open .edf file. Exiting ...'); return; end
+        if edfFileStatus ~= 0, fprintf('Cannot open .edf file. Exiting ...');
+            try
+                Eyelink('CloseFile');
+                Eyelink('Shutdown');
+            end
+            return; 
+        else
+            fprintf('\n[%s]: Succesfully openend Eyelink file..\n',mfilename)
+        end
         
         cal = EyelinkDoTrackerSetup(el);
+        
     end
         
     
-    %%
+    %% Create stimuli
     
     % Store the images in textures
     stimulus = createTextures(params.display,stimulus);
@@ -128,17 +141,20 @@ try
         else timeFromT0 = true;
         end
         
-        
-      %Eyelink('StartRecording');
-        
+        if params.doEyelink
+            Eyelink('StartRecording');
+        end
+      
         [response, timing, quitProg] = showScanStimulus(params.display,stimulus,time0, timeFromT0); %#ok<ASGLU>
         
-      %Eyelink('StopRecording');
-      %Eyelink('ReceiveFile', ELfileName, fileparts(vistadispRootPath) ,1);
+        if params.doEyelink
+            Eyelink('StopRecording');
+            Eyelink('ReceiveFile', ELfileName, fileparts(vistadispRootPath) ,1);
         
-      %Eyelink('CloseFile');
+            Eyelink('CloseFile');
         
-      %Eyelink('Shutdown');
+            Eyelink('Shutdown');
+        end
         
         % reset priority
         Priority(0);
@@ -149,17 +165,16 @@ try
         
         % save
         if params.savestimparams,
-      %      thisELfName = strsplit(ELfileName, '.');
             filename = fullfile(fileparts(vistadispRootPath), ...
-                sprintf('%s.mat', datestr(now,30)));
+                sprintf('%s_%s.mat', sesFileName, datestr(now,30)));
             save(filename);                % save parameters
             fprintf('[%s]:Saving in %s.\n',mfilename,filename);
-        end;
+        end
         
         % don't keep going if quit signal is given
-        if quitProg, break; end;
+        if quitProg, break; end
         
-    end;
+    end
     
     % Close the one on-screen and many off-screen windows
     closeScreen(params.display);
@@ -168,7 +183,7 @@ catch ME
     % clean up if error occurred
     Screen('CloseAll'); setGamma(0); Priority(0); ShowCursor;
     warning(ME.identifier, ME.message);
-end;
+end
 
 return;
 
