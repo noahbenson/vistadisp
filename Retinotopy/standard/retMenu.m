@@ -165,6 +165,8 @@ set(handles.motionSteps,        'String',   num2str(data.motionSteps));
 set(handles.tempFreq,           'String',   num2str(data.tempFreq));
 set(handles.contrast,           'String',   num2str(data.contrast));
 set(handles.skipSyncTestCheckbox, 'Value',    data.skipSyncTests);
+set(handles.doEyelinkCheckbox,    'Value',    data.doEyelink);
+
 
 % set the string parameters
 if isfinite(data.interleaves ), set(handles.interleaves,'String', num2str(data.interleaves));
@@ -218,6 +220,7 @@ data.modality        = tmp(get(handles.modality(1),'Value'));
 
 data.savestimparams  = get(handles.savestimparams,'Value');
 data.skipSyncTests   = get(handles.skipSyncTestCheckbox,'Value');
+data.doEyelink       = get(handles.doEyelinkCheckbox,'Value');
 data.repetitions     = str2num(get(handles.repetitions,     'String')); %#ok<*ST2NM>
 data.runPriority     = str2num(get(handles.runPriority,     'String'));
 data.skipCycleFrames = str2num(get(handles.skipCycleFrames, 'String'));
@@ -683,3 +686,8 @@ function skipSyncTestCheckbox_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of skipSyncTestCheckbox
+
+function doEyelinkCheckbox_Callback(hObject, eventdata, handles)
+    handles.data.doEyelink = get(hObject,'Value');
+    guidata(hObject,handles);
+return
