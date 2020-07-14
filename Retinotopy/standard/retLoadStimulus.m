@@ -30,4 +30,4 @@ switch params.experiment
         stimulus = makeRetinotopyStimulus(params);
 end
 
-return
+end

@@ -24,16 +24,16 @@ try
 	c = display.backColorIndex;
 catch
 	c = display.backColorRgb;
-end;
+end
 
 for stimNum = 1:length(stimulus)
 
 	% if stored as cell?!
 	% maybe everything should be cell based and not based on the 3 image
 	% dimension - this would allow easy support for rgb images
-	if iscell(stimulus(stimNum).images),
+	if iscell(stimulus(stimNum).images)
 		stimulus(stimNum).images = cell2mat(stimulus(stimNum).images);
-	end;
+    end
 
 	% number of images
 	nImages = size(stimulus(stimNum).images,3);
@@ -41,15 +41,15 @@ for stimNum = 1:length(stimulus)
 	% make Rects
 	stimulus(stimNum).srcRect = [0,0,size(stimulus(stimNum).images, 2), ...
 		size(stimulus(stimNum).images, 1)];
-	if ~isfield(display,'destRect'),
+	if ~isfield(display,'destRect')
 		stimulus(stimNum).destRect = CenterRect(stimulus(stimNum).srcRect, display.rect);
 	else
 		stimulus(stimNum).destRect = CenterRect(display.destRect, display.rect);
-	end;
+    end
 	% clean up nicely if any of the textures are not null.
-	if isfield(stimulus(stimNum), 'textures'),
+	if isfield(stimulus(stimNum), 'textures')
 		nonNull = find(stimulus(stimNum).textures);
-		for i=1:length(nonNull),
+		for i=1:length(nonNull)
 			% run this from eval to suppress any errors that might ensue if the texture isn't valid
             % converted eval to try, as two argument use of eval is now deprecated (jw)
             try

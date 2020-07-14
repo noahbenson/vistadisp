@@ -1,7 +1,19 @@
 function stimulus = makeRetinotopyStimulusFromFile(params)
 % Load a stimulus description from a file
 %
-% stimulus = makeRetinotopyStimulusFromFile(params)
+% Synopsis
+%   stimulus = makeRetinotopyStimulusFromFile(params)
+%
+% The params includes a slot for 'loadMatrix' that identifies the name
+% of the stimulus file (params.loadMatrix)
+%
+% Typically, the standard image files are stored in a directory like
+% this:
+%
+%  vistadisp/Retinotopy/standard/storedImagesMatrices/8bars.mat
+%
+% See also
+%
 
 % Check whether loadMatrix exists
 if ~isfield(params, 'loadMatrix'), error('No loadMatrix to load'); end
@@ -11,7 +23,7 @@ if ~exist(params.loadMatrix, 'file'), error('Cannot locate stim file %s.', param
 tmp = load(params.loadMatrix, 'stimulus');
 
 if isfield(tmp, 'stimulus'),  stimulus = tmp.stimulus;    
-else                          stimulus = tmp;  end
+else,                         stimulus = tmp;  end
 
 % clear textures field if it extists. textures will be remade lated
 if isfield(stimulus, 'textures'), stimulus = rmfield(stimulus, 'textures'); end
@@ -29,3 +41,5 @@ fixSeq(fixSeq>2)=2;
 fixSeq(fixSeq<1)=1;
 
 stimulus.fixSeq = fixSeq;
+
+end

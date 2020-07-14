@@ -6,7 +6,7 @@ function params = ret(params)
 %             omitted, GUI is opened to set parameters
 %
 % 06/2005 SOD Ported to OSX. If the mouse is invisible,
-%             moving it to the Dock usually make s it reappear.
+%             moving it to the Dock usually makes it reappear.
 % 10/2005 SOD Several changes, including adding gui.
 % 1/2009 JW   Added optional input arg 'params'. This allows you to
 %             specify your parameters in advance so that the GUI loads up
@@ -29,9 +29,10 @@ function params = ret(params)
 % clean up - it's good to clean up but mex files are extremely slow to be
 % loaded for the first time in MacOSX, so I chose not to do this to speed
 % things up.
-%close all;close hidden;
-%clear mex; clear all;
-%pack;
+%
+% close all;close hidden;
+% clear mex; clear all;
+% pack;
 
 % get some parameters from graphical interface
 if ~exist('params', 'var'), params = []; end
@@ -48,3 +49,5 @@ params = setRetinotopyDevices(params);
 
 % go
 doRetinotopyScan(params);
+
+end

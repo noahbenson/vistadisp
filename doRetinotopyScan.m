@@ -11,7 +11,9 @@ function doRetinotopyScan(params)
 %           ShowScanStimulus with the argument timeFromT0 == false. See
 %           ShowScanStimulus for details. 
 
-% defaults
+% defaults:
+%    params = retCreateDefaultGUIParams;
+%
 if ~exist('params', 'var'), error('No parameters specified!'); end
 
 % make/load stimulus
@@ -72,7 +74,7 @@ try
         %
         % %     Throw an error if calibration failed
         if s~=0
-            error('link_sample_data error, status: ', s)
+            error('link_sample_data error, status: %s', s)
         end
    
         el = prepEyelink(params.display.windowPtr);
@@ -185,7 +187,7 @@ catch ME
     warning(ME.identifier, ME.message);
 end
 
-return;
+end
 
 
 
