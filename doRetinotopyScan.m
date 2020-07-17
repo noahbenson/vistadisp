@@ -180,9 +180,9 @@ try
         
         % save
         if params.savestimparams
-            filename = fullfile(fileparts(vistadispRootPath), ...
-                sprintf('%s_%s.mat', sesFileName, datestr(now,30)));
-            save(filename);                % save parameters
+            fname = sprintf('%s_%s.mat', sesFileName, datestr(now,30));
+            filename = fullfile(vistadispRootPath,'Retinotopy','standard','storedImagesMatrices',fname);
+            save(filename);                % save all environmental parameters
             fprintf('[%s]:Saving in %s.\n',mfilename,filename);
         end
         
