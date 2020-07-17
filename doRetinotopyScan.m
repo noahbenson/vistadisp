@@ -38,10 +38,6 @@ KbCheck;GetSecs;WaitSecs(0.001);%clear
 % sesNum = input('Please enter session number: ', 's');
 % sesNum = str2double(sesNum);
 
-sesFileName = sprintf('%s', params.loadMatrix);
-% The time stamp is added later.  That is how we can associate
-% specific files with specific acquisitions.
-
 %{
 while exist(sprintf('%s.edf',sesFileName), 'file')
     
@@ -69,6 +65,8 @@ try
     % to allow blending
     Screen('BlendFunction', params.display.windowPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+    sesFileName = sprintf('%s', params.loadMatrix);
+
     %% Initialize EyeLink if requested
     if params.doEyelink
         fprintf('\n[%s]: Setting up Eyelink..\n',mfilename)
@@ -180,8 +178,11 @@ try
         
         % save
         if params.savestimparams
-            fname = sprintf('%s_%s.mat', sesFileName, datestr(now,30));
-            filename = fullfile(vistadispRootPath,'Retinotopy','standard','storedImagesMatrices',fname);
+            [~,n,~] = fileparts(params.loadMatrix);  % It seems to have the full path prepended by now
+            fname = sprintf('%s_%s.mat', n, datestr(now,30));
+            fdir = fullfile(vistadispRootPath,'Retinotopy','standard','storedImagesMatrices');
+            if ~exist(fdir,'dir'), mkdir(fdir); end
+            filename = fullfile(fdir,fname);
             save(filename);                % save all environmental parameters
             fprintf('[%s]:Saving in %s.\n',mfilename,filename);
         end
