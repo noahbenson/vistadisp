@@ -129,7 +129,7 @@ try
     
     % [params, stimulus] = retLoadEmoji(params, stimulus);
     
-    for n = 1:params.repetitions,
+    for n = 1:params.repetitions
         % set priority
         Priority(params.runPriority);
         

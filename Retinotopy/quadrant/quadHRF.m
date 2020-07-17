@@ -2,8 +2,11 @@
 %
 % Set up a stimulus to help estimate the HRF.
 %
-% THe idea is:
+% The idea is to create a series of 2s stimuli with a variety of inter
+% temporal intervals and then fit the HRF to the BOLD time series.
 %
+% See also
+%   quad*.m
 
 %% Load up the basic set of stimulus parameters
 
@@ -12,9 +15,12 @@
 load('8bars.mat','stimulus');
 disp(stimulus)
 
-%% Different quadrants.  Two contrasts.
+%% Create the patterns
 
-% a contrast stimulus has only 0, 128, 255 (uint8)
+% Two contrasts that alternative at 16 FPS but at 2 Hz.
+
+% A contrast stimulus has only 0, 128, 255 (uint8).  The uniform field
+% is all 128s.
 blank = uint8(128*ones(1080,1080));
 
 % If there are 1080 pixels, there will be about 1080/48 blocks across
@@ -90,35 +96,43 @@ for ii=1:3
     image(images(:,:,ii)); pause(0.5);
 end
 
-%% Make the display sequence
+%% Make the display temporal sequence
 %
 % 16 FPS
-% 12 sec of blank at the start is 32*12; (initBlank)
-% 2 sec of stimulation means 32 frames for the stimulus
-% Rather than stim-long blank we will estimate the HRF from randomly
-% spaced 2 sec pulses where the blank duration is randomly selected between
-% 4 and 12 sec.  The total will add up to 192 sec of stimuli and blank
+% 12 sec of blank at the start is 32*12 frames; (initBlank)
 %
-% 22 sec of blank is 16*22
+% 2 sec of stimulation means 32 frames for the stimulus
+% Alternating at 2 Hz means present 4 frames of each contrast
+%
+% We will estimate the HRF from the BOLD response to randomly spaced 2
+% sec pulses where the blank duration is randomly selected between 4
+% and 20 sec.  The total will add up to 192 sec of stimuli and blank
+%
 % Total of 192 sec is 8*24
-% Alternating at 2 Hz means alternate 4 frames of each contrast
 
 img1 = 1; img2 = 2; imgB = 3;
-initBlank = ones(1,16*12)*imgB;   
+initBlank = ones(1,16*12)*imgB;   % 12 blank seconds
 
-stim = repmat([ones(1,4)*img1, ones(1,4)*img2],1,4);
+stim = repmat([ones(1,4)*img1, ones(1,4)*img2],1,4);  % 2 sec stimulus
+
+% We will be in some number of blank frames
 oneSecBlank = ones(1,16)*imgB;
+twoSecBlank = ones(1,32)*imgB;
 
-% Here are many random intervals, all 4 sec or larger
-blanks = randi(12,[500,1]);
-blanks = blanks(blanks > 3);
-sum(blanks)
-histogram(blanks)
+% The blanks are each a multiple of 2 sec.
+blanks = randi(10,[500,1]);
+blanks = blanks(blanks > 1);
+sum(blanks*2)
+histogram(blanks*2); xlabel('Sec')
 
-% Build up the 192 + 12 sec sequence
+%% Build up the 192 + 12 sec sequence
+
+% Initialize RNG
+rng(100);
+
 seq = stim;
 for ii=1:numel(blanks)
-    seq = [seq,repmat(oneSecBlank,1,blanks(ii)),stim];
+    seq = [seq,repmat(twoSecBlank,1,blanks(ii)),stim];
     duration = length(seq)/16;
     secLeft = 192 - duration;
     if secLeft < 12
@@ -126,9 +140,12 @@ for ii=1:numel(blanks)
         break;
     end
 end
-length(seq)/16 + 12
+
+% Add the initial blanks
 seq = [initBlank, seq];
-length(seq)/16;
+
+% Total length should be 192 + 12 = 204
+length(seq)/16
 
 %% Save it out
 
@@ -136,56 +153,7 @@ stimulus.images = images;
 stimulus.seq = seq;
 p = fileparts(which('8bars.mat'));
 fname = fullfile(p,'HRFestimate');
+fprintf('Saving HRF estimate stimulus %s\n',fname);
 save(fname,'stimulus');
 
-%% TODO:  Test the flipud switch
-%  Build the stimulus sequence for 2 sec HRF responses
-%  2 sec then nothing in that quadrant for 20 sec
-%  UL: Stim (2)   Blank (22)  Stim(2)     Blank (22)
-%  LR: Blank(6)   Stim (2)    Blank (22)
-%  LR: Blank(12)  Stim (2)    Blank (22)
-%  UR: Blank(18)  Stim (2)    Blank (22)
-%
-
-%{
-%% Define the quadrant row/cols 
-
-ulRows = 1:(1080/2); ulCols = 1:(1080/2);
-urRows = ulRows;     urCols = ((1080/2)+1):1080;
-llRows = ((1080/2)+1):1080; llCols = ulCols;
-lrRows = llRows;  lrCols = urCols;
-
-%% Create the quadrant contrast patterns
-
-ulContrast1 = blank; ulContrast2 = blank;
-ulContrast1(ulRows,ulCols) = contrast1;
-ulContrast2(ulRows,ulCols) = contrast2;
-image(ulContrast1); image(ulContrast2)
-
-urContrast1 = blank; urContrast2 = blank;
-urContrast1(urRows,urCols) = contrast1;
-urContrast2(urRows,urCols) = contrast2;
-image(urContrast1); image(urContrast2)
-
-llContrast1 = blank; llContrast2 = blank;
-llContrast1(llRows,llCols) = contrast1;
-llContrast2(llRows,llCols) = contrast2;
-image(llContrast1); image(llContrast2)
-
-lrContrast1 = blank; lrContrast2 = blank;
-lrContrast1(lrRows,urCols) = contrast1;
-lrContrast2(lrRows,urCols) = contrast2;
-image(lrContrast1); image(lrContrast2)
-
-%% Put the 9 images into the stimulus.images
-images = uint8(zeros(1080,1080,9));
-images(:,:,1) = ulContrast1;
-images(:,:,2) = ulContrast2;
-images(:,:,3) = urContrast1;
-images(:,:,4) = urContrast2;
-images(:,:,5) = llContrast1;
-images(:,:,6) = llContrast2;
-images(:,:,7) = lrContrast1;
-images(:,:,8) = lrContrast2;
-images(:,:,9) = blank;
-%}
+%%
