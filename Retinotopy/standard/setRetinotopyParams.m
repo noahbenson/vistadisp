@@ -36,3 +36,5 @@ params = retSetDerivedParams(params);
 params.period = round(params.period/params.framePeriod) * params.framePeriod;
 % some checks, must be done before we reset certain params
 retParamsCheck(params);
+
+end

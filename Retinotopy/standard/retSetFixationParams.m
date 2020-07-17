@@ -202,7 +202,8 @@ switch expName
                                          255 255 255 255];
         params.display.fixSizePixels  = 3;
 
-end;
+end
+
 
 
 

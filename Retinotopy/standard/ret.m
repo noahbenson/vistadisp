@@ -47,6 +47,8 @@ params = setRetinotopyParams(params.experiment, params);
 % set response device
 params = setRetinotopyDevices(params);
 
+disp(params)
+
 % go
 doRetinotopyScan(params);
 

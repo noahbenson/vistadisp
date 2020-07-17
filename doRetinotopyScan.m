@@ -14,6 +14,11 @@ function doRetinotopyScan(params)
 % defaults:
 %    params = retCreateDefaultGUIParams;
 %
+
+% Examples:
+%{
+   doRetinotopyScan(params);
+%}
 if ~exist('params', 'var'), error('No parameters specified!'); end
 
 % make/load stimulus
@@ -24,13 +29,14 @@ stimulus = retLoadStimulus(params);
 % the ones we are using are loaded.
 KbCheck;GetSecs;WaitSecs(0.001);%clear
 
-fprintf('\n')
-initials = input('Please enter subjct initials: ', 's');
-sesNum = input('Please enter session number: ', 's');
-sesNum = str2double(sesNum);
+sesNum = 1; initials = 'anon';
+% fprintf('\n')
+% initials = input('Please enter subject initials: ', 's');
+% sesNum = input('Please enter session number: ', 's');
+% sesNum = str2double(sesNum);
 
-sesFileName = sprintf('%s%d', initials, sesNum);
-
+sesFileName = sprintf('%s-%d-%s', initials, sesNum, datetime);
+%{
 while exist(sprintf('%s.edf',sesFileName), 'file')
     
     fprintf('\nFilename %s exists. Please re-enter subj ID and session number.\n', sesFileName)
@@ -40,7 +46,8 @@ while exist(sprintf('%s.edf',sesFileName), 'file')
     sesFileName = sprintf('%s%d%s', initials, sesNum);
     
 end
-   
+%}
+
 try
 
     % check for OpenGL
@@ -140,7 +147,7 @@ try
         % go
         if isfield(params, 'modality') && strcmpi(params.modality, 'ecog')
             timeFromT0 = false;
-        else timeFromT0 = true;
+        else, timeFromT0 = true;
         end
         
         if params.doEyelink
@@ -166,7 +173,7 @@ try
         fprintf('[%s]: percent correct: %.1f %%, reaction time: %.1f secs\n',mfilename,pc,rc);
         
         % save
-        if params.savestimparams,
+        if params.savestimparams
             filename = fullfile(fileparts(vistadispRootPath), ...
                 sprintf('%s_%s.mat', sesFileName, datestr(now,30)));
             save(filename);                % save parameters
