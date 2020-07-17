@@ -29,13 +29,19 @@ stimulus = retLoadStimulus(params);
 % the ones we are using are loaded.
 KbCheck;GetSecs;WaitSecs(0.001);%clear
 
-sesNum = 1; initials = 'anon';
+% We get a unique session by the time stamp (to the second).  We will
+% let Flywheel deal with the names of the MR files.
+% sesNum = 1; 
+% initials = 'anon';
 % fprintf('\n')
 % initials = input('Please enter subject initials: ', 's');
 % sesNum = input('Please enter session number: ', 's');
 % sesNum = str2double(sesNum);
 
-sesFileName = sprintf('%s-%d-%s', initials, sesNum, datetime);
+sesFileName = sprintf('%s', params.loadMatrix);
+% The time stamp is added later.  That is how we can associate
+% specific files with specific acquisitions.
+
 %{
 while exist(sprintf('%s.edf',sesFileName), 'file')
     

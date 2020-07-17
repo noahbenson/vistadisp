@@ -5,6 +5,8 @@
 %
 % We apply a hard scotoma.  Maybe I should have blurred it.
 %
+% Scotoma quadrant is upper left (lesion is ventral right hemisphere)
+%
 % See also
 %
 
@@ -18,7 +20,7 @@ disp(stimulus)
 
 % Select the upper right rows and cols
 rows = 1:(1080/2);
-cols = (1080/2):1080;
+cols = 1:(1080/2);
 uniform = 128*ones(numel(rows),numel(cols));
 
 images2 = stimulus.images;
@@ -37,7 +39,7 @@ end
 
 stimulus.images = images2;
 p = fileparts(which('8bars.mat'));
-fname = fullfile(p,'8barsUpperRightScotoma');
+fname = fullfile(p,'8barsUpperLeftScotoma');
 fprintf('Saved in storedImageMatrices %s\n',fname);
 
 save(fname,'stimulus');
@@ -50,10 +52,13 @@ disp(stimulus)
 
 %%  Create the scotoma
 
+% Replace the rows/cols with a uniform field
 images2 = stimulus.images;
 for ii=1:size(stimulus.images,3)
     images2(rows,cols,ii) = uniform;
 end
+
+%% Visualize
 
 % Everything is the same but the positions are randomized
 for ii=1:size(images2,3)
@@ -65,7 +70,7 @@ end
 
 stimulus.images = images2;
 p = fileparts(which('8bars.mat'));
-fname = fullfile(p,'8barsShuffledUpperRightScotoma.mat');
+fname = fullfile(p,'8barsShuffledUpperLeftScotoma.mat');
 fprintf('Saved in storedImageMatrices %s\n',fname);
 
 save(fname,'stimulus');
