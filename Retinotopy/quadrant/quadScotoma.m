@@ -7,6 +7,10 @@
 %
 % Scotoma quadrant is upper left (lesion is ventral right hemisphere)
 %
+% This approach means that the order of the bars in the scotoma and
+% matching conditions is the same.  Consequently we can use the
+% non-scotoma stimulus as a model when running with the scotoma data.
+%
 % See also
 %
 
