@@ -15,30 +15,17 @@ function doRetinotopyScan(params)
 if ~exist('params', 'var'), error('No parameters specified!'); end
 
 % make/load stimulus
+fprintf('\n\nLoading Stimulus...\n');
 stimulus = retLoadStimulus(params);
 
 % loading mex functions for the first time can be
 % extremely slow (seconds!), so we want to make sure that
 % the ones we are using are loaded.
 KbCheck;GetSecs;WaitSecs(0.001);%clear
-
-fprintf('\n')
-initials = input('Please enter subjct initials: ', 's');
-sesNum = input('Please enter session number: ', 's');
-sesNum = str2double(sesNum);
-
-sesFileName = sprintf('%s%d', initials, sesNum);
-
-while exist(sprintf('%s.edf',sesFileName), 'file')
     
-    fprintf('\nFilename %s exists. Please re-enter subj ID and session number.\n', sesFileName)
-    initials = input('Please enter subjct initials: ', 's');
-    sesNum = input('Please enter session number: ', 's');
-    sesNum = str2double(sesNum);
-    sesFileName = sprintf('%s%d%s', initials, sesNum);
-    
-end
-   
+% Get the session / subject.
+sesFileName = getSesFilename(params);
+
 try
 
     % check for OpenGL
@@ -54,11 +41,61 @@ try
     % to allow blending
     Screen('BlendFunction', params.display.windowPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+    % Make a nice screen if requested (this code copied and pasted from
+    % inside the pressKey2Begin function).
+    if isfield(params, 'instructions')
+        instructs = params.instructions;
+        display = params.display;
+        Screen('FillRect', display.windowPtr, display.backColorRgb);
+        drawFixation(display);
+        if iscell(instructs)
+            % multi-line input: present each line separately
+            nLines = length(instructs);
+            vRange = min(.4, .04 * nLines/2);  % vertical axis range of message
+            vLoc = 0.5 + linspace(-vRange, vRange, nLines); % vertical location of each line
+            textSize = 20;
+            oldTextSize = Screen('TextSize', display.windowPtr, textSize);
+            charWidth = textSize/4.5; % character width
+            for n = 1:nLines
+                loc(1) = display.rect(3)/2 - charWidth*length(instructs{n});
+		        loc(2) = display.rect(4) * vLoc(n);
+		        Screen('DrawText', display.windowPtr, instructs{n}, loc(1), loc(2), display.textColorRgb);
+            end
+            drawFixation(display);
+            Screen('Flip',display.windowPtr);
+            Screen('TextSize', display.windowPtr, oldTextSize);
+        else
+            % single line: present in the middle of the screen
+            dispStringInCenter(display, instructs, 0.55);
+        end
+    end
+
+    % Create stimuli.
+    % Store the images in textures
+    fprintf('\nCreating Textures...\n');
+    t0 = tic();
+    stimulus = createTextures(params.display,stimulus);
+    t1 = toc(t0);
+    fprintf("(%f seconds elapsed.)\n", t1);
+    % If necessary, flip the screen LR or UD  to account for mirrors
+    % We now do a single screen flip before the experiment starts (instead
+    % of flipping each image). This ensures that everything, including
+    % fixation, stimulus, countdown text, etc, all get flipped.
+    retScreenReverse(params, stimulus);
+    % If we are doing ECoG, then add photodiode flash to every other frame
+    % of stimulus. This can be used later for syncing stimulus to electrode
+    % outputs.
+    stimulus = retECOGtrigger(params, stimulus);
+
     %% Initialize EyeLink if requested
     if params.doEyelink
         fprintf('\n[%s]: Setting up Eyelink..\n',mfilename)
-        
-        Eyelink('SetAddress','192.168.1.5');
+        if isfield(params, 'eyelinkIP')
+            eyelinkAddr = params.eyelinkIP;
+        else
+            eyelinkAddr = '192.168.1.5';
+        end
+        Eyelink('SetAddress',eyelinkAddr);
         el = EyelinkInitDefaults(params.display.windowPtr);
         EyelinkUpdateDefaults(el);
         %
@@ -94,25 +131,6 @@ try
         cal = EyelinkDoTrackerSetup(el);
         
     end
-        
-    
-    %% Create stimuli
-    
-    % Store the images in textures
-    stimulus = createTextures(params.display,stimulus);
-    
-    % If necessary, flip the screen LR or UD  to account for mirrors
-    % We now do a single screen flip before the experiment starts (instead
-    % of flipping each image). This ensures that everything, including
-    % fixation, stimulus, countdown text, etc, all get flipped.
-    retScreenReverse(params, stimulus);
-    
-    % If we are doing ECoG, then add photodiode flash to every other frame
-    % of stimulus. This can be used later for syncing stimulus to electrode
-    % outputs.
-    stimulus = retECOGtrigger(params, stimulus);
-    
-    % [params, stimulus] = retLoadEmoji(params, stimulus);
     
     for n = 1:params.repetitions,
         % set priority
@@ -123,7 +141,14 @@ try
         
         % wait for go signal
         onlyWaitKb = false;
-        pressKey2Begin(params.display, onlyWaitKb, [], [], params.triggerKey);
+        if isfield(params, 'beginPrompt')
+            prompt = params.beginPrompt;
+        else
+            prompt = {'When the experiment begins,';
+                      'this message will disappear.'};
+        end
+        pressKey2Begin(params.display, onlyWaitKb, ...
+                       [], prompt, params.triggerKey);
 
 
         % If we are doing eCOG, then signal to photodiode that expt is
@@ -145,14 +170,12 @@ try
             Eyelink('StartRecording');
         end
       
-        [response, timing, quitProg] = showScanStimulus(params.display,stimulus,time0, timeFromT0); %#ok<ASGLU>
+        [response, timing, quitProg] = showScanStimulus(params.display,stimulus,time0, timeFromT0, params); %#ok<ASGLU>
         
         if params.doEyelink
             Eyelink('StopRecording');
             Eyelink('ReceiveFile', ELfileName, fileparts(vistadispRootPath) ,1);
-        
             Eyelink('CloseFile');
-        
             Eyelink('Shutdown');
         end
         
@@ -186,9 +209,6 @@ catch ME
 end
 
 return;
-
-
-
 
 
 
