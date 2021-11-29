@@ -32,7 +32,11 @@ try
     AssertOpenGL;
     
     % to skip annoying warning message on display (but not terminal)
-    Screen('Preference','SkipSyncTests', 1);
+    if isfield(params, 'skipSyncTest')
+        Screen('Preference','SkipSyncTests', params.skipSyncTests);
+    else
+        Screen('Preference','SkipSyncTests', 1);
+    end
     
     % Open the screen
     params.display                = openScreen(params.display);
@@ -140,6 +144,9 @@ try
         retResetColorMap(params);
         
         % wait for go signal
+        fprintf('\n\n------------------------------------------------\n');
+        fprintf('The stimulus program is now ready and will begin\n');
+        fprintf('when it detects a ''%s'' character.\n', params.triggerKey);
         onlyWaitKb = false;
         if isfield(params, 'beginPrompt')
             prompt = params.beginPrompt;
@@ -149,7 +156,6 @@ try
         end
         pressKey2Begin(params.display, onlyWaitKb, ...
                        [], prompt, params.triggerKey);
-
 
         % If we are doing eCOG, then signal to photodiode that expt is
         % starting by giving a patterned flash
